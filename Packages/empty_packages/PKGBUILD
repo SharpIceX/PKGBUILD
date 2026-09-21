@@ -1,0 +1,11 @@
+# shellcheck disable=SC2034 disable=SC2148
+
+pkgname=empty_packages
+pkgver=1.0.0
+pkgrel=1
+arch=('any')
+provides=('pnpm' 'yarn' 'gulp')
+conflicts=("${provides[@]}")
+package() {
+    :
+}

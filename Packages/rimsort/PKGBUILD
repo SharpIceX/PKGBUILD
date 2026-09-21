@@ -1,0 +1,95 @@
+# shellcheck disable=SC2034 disable=SC2148 disable=SC2164 disable=SC2154
+
+pkgname="rimsort"
+pkgver=1.14.0
+pkgrel=2
+pkgdesc="A Mod Manager For Rimworld game"
+arch=("x86_64")
+url="https://github.com/RimSort/RimSort"
+license=("GPL3")
+makedepends=(
+    uv
+    git
+    qt6-tools
+)
+depends=(
+    qt6-base
+    fcitx5-qt
+)
+optdepends=(
+    "todds: Texture optimization support"
+)
+source=(
+    "git+https://github.com/RimSort/RimSort.git#tag=v${pkgver}"
+    "RimSort.desktop"
+    "RimSort.sh"
+)
+sha512sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+options=(!strip)
+
+prepare() {
+    cd "$srcdir/RimSort"
+    git submodule update --init --recursive
+}
+
+build() {
+    cd "$srcdir/RimSort"
+
+    cat <<EOF > version.xml
+<version>
+  <version>v${pkgver}</version>
+  <major>${pkgver%%.*}</major>
+  <minor>$(echo $pkgver | cut -d. -f2)</minor>
+  <patch>${pkgver##*.}</patch>
+  <increment>0</increment>
+  <commit>$(git rev-parse HEAD)</commit>
+  <tag>v${pkgver}</tag>
+</version>
+EOF
+
+    shopt -s nullglob
+    rm -f locales/*.qm
+    for ts_file in locales/*.ts; do
+        lrelease "$ts_file" -qm "${ts_file%.ts}.qm"
+    done
+
+    uv sync --locked --no-dev --group build
+    uv run --frozen python ./distribute.py --product-version="${pkgver}.0" --skip-build
+
+    PYTHONPATH="$PWD/submodules/SteamworksPy" \
+        uv run --frozen nuitka \
+        --mode=standalone \
+        --enable-plugin=pyside6 \
+        --noinclude-qt-translations \
+        --noinclude-default-mode=warning \
+        --include-data-files=version.xml=version.xml \
+        --nofollow-import-to=numpy,sqlalchemy.dialects.mssql,sqlalchemy.dialects.mysql,sqlalchemy.dialects.oracle,sqlalchemy.dialects.postgresql \
+        --remove-output \
+        --output-dir="$srcdir/build" \
+        app/
+}
+
+package() {
+    cd "$srcdir/RimSort"
+
+    install -dm755 "$pkgdir/opt/rimsort"
+
+    cp -a "$srcdir/build/app.dist/." "$pkgdir/opt/rimsort/"
+    cp -a themes "$pkgdir/opt/rimsort/"
+
+    install -dm755 "$pkgdir/opt/rimsort/locales"
+    cp -a locales/*.qm "$pkgdir/opt/rimsort/locales/" 2>/dev/null || true
+
+    if [[ -d libs ]]; then
+        cp -a libs "$pkgdir/opt/rimsort/"
+    fi
+
+    install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 themes/default-icons/AppIcon_a.png "$pkgdir/usr/share/pixmaps/RimSort.png"
+    install -Dm644 "$srcdir/RimSort.desktop" "$pkgdir/usr/share/applications/RimSort.desktop"
+    install -Dm755 "$srcdir/RimSort.sh" "$pkgdir/usr/bin/RimSort"
+}

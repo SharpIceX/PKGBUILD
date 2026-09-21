@@ -1,0 +1,137 @@
+# shellcheck disable=SC2148 disable=SC2154 disable=SC2034
+
+pkgname="java-local-bundle-bin"
+pkgrel=1
+arch=('x86_64')
+pkgver=2026.07.03
+license=('custom')
+options=('!strip')
+url='https://www.azul.com/downloads'
+pkgdesc="Custom bundle of Zulu JDKs: 8, 11, 17, 21, and 25"
+depends=('java-environment-common' 'java-runtime-common' 'ca-certificates-utils')
+
+provides=(
+  # Java 8
+  "java-runtime-2"
+  "java-runtime-headless-2"
+  "java-runtime-openjdk-2"
+  "java-environment-2"
+  "java-environment-openjdk-2"
+  "java-runtime=8"
+  "java-runtime-headless=8"
+  "java-runtime-openjdk=8"
+  "java-environment=8"
+  "java-environment-openjdk=8"
+
+  # Java 11
+  "java-runtime=11"
+  "java-runtime-headless=11"
+  "java-runtime-openjdk=11"
+  "java-environment=11"
+  "java-environment-openjdk=11"
+
+  # Java 17
+  "java-runtime=17"
+  "java-runtime-headless=17"
+  "java-runtime-openjdk=17"
+  "java-environment=17"
+  "java-environment-openjdk=17"
+
+  # Java 21
+  "java-runtime=21"
+  "java-runtime-headless=21"
+  "java-runtime-openjdk=21"
+  "java-environment=21"
+  "java-environment-openjdk=21"
+
+  # Java 25
+  "java-runtime=25"
+  "java-runtime-headless=25"
+  "java-runtime-openjdk=25"
+  "java-environment=25"
+  "java-environment-openjdk=25"
+
+  # 其他
+  "jdk25-openjdk"
+)
+
+source=(
+  "jdk8.tar.gz::https://cdn.azul.com/zulu/bin/zulu8.96.0.205-ca-fx-jdk8.0.504-linux_x64.tar.gz"
+  "jdk11.tar.gz::https://cdn.azul.com/zulu/bin/zulu11.90.205-ca-fx-jdk11.0.32.1-linux_x64.tar.gz"
+  "jdk17.tar.gz::https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-fx-jdk17.0.20.1-linux_x64.tar.gz"
+  "jdk21.tar.gz::https://cdn.azul.com/zulu/bin/zulu21.52.203-ca-fx-jdk21.0.12.1-linux_x64.tar.gz"
+  "jdk25.tar.gz::https://cdn.azul.com/zulu/bin/zulu25.36.205-ca-fx-jdk25.0.4.1-linux_x64.tar.gz"
+)
+sha256sums=(
+    'c5dcd67eac70e56154e06fa1dca88d27b5a66114835303155f3388e130bb430a'
+    'ee90afd42c2e3e2cab7e1f1d64c0ea8ff43064aa2caa9903fb305bedd6d41961'
+    'd9aee66304a647e0bac7f732624ffac2b0c52962389291c08eacf00bc3779443'
+    '6b3f9319490fb265252647676ef74008695b9d3a3725b214c3679cb01dfde87d'
+    'dc541c82220402985ef4f646246235a55920f4493d79670eddaf33fa45a5c73c')
+
+package() {
+  _install_jdk() {
+    local v_num="$1"
+    local folder_pre="$2"
+    local dest_name="java-${v_num}-zulu"
+    local jvmdir="/usr/lib/jvm/${dest_name}"
+    local etcdir="/etc/zulu-bundle/${dest_name}"
+
+    # 定位解压目录
+    local src_path
+    src_path=$(find "$srcdir" -maxdepth 1 -type d -name "${folder_pre}*" -print -quit)
+
+    # 安装基本 JDL
+    install -dm 755 "${pkgdir}${jvmdir}"
+    cp -a "${src_path}"/* "${pkgdir}${jvmdir}/"
+
+    # 处理配置和证书库
+    install -dm 755 "${pkgdir}${etcdir}"
+    if [[ ${v_num} -eq 8 ]]; then
+      # Java 8
+      local target_sec="${jvmdir}/jre/lib/security"
+
+      cp -r "${pkgdir}${target_sec}"/* "${pkgdir}${etcdir}/"
+      ln -sf /etc/ssl/certs/java/cacerts "${pkgdir}${etcdir}/cacerts"
+
+      rm -rf "${pkgdir}${target_sec}"
+      ln -s "${etcdir}" "${pkgdir}${target_sec}"
+    else
+      # Java 11/17/21/25
+      cp -r "${pkgdir}${jvmdir}/conf"/* "${pkgdir}${etcdir}/"
+      rm -rf "${pkgdir}${jvmdir}/conf"
+      ln -s "${etcdir}" "${pkgdir}${jvmdir}/conf"
+
+      local cacerts_path="${jvmdir}/lib/security/cacerts"
+      rm -f "${pkgdir}${cacerts_path}"
+      ln -sf /etc/ssl/certs/java/cacerts "${pkgdir}${cacerts_path}"
+    fi
+
+    # 4. 处理 Man Pages
+    if [[ -d "${pkgdir}${jvmdir}/man/man1" ]]; then
+      install -dm 755 "${pkgdir}/usr/share/man/man1"
+      for m in "${pkgdir}${jvmdir}/man/man1"/*.1; do
+        [[ -e "$m" ]] || continue
+        local bname
+        bname=$(basename "$m" .1)
+        install -Dm 644 "$m" "${pkgdir}/usr/share/man/man1/${bname}-zulu${v_num}.1"
+      done
+      rm -rf "${pkgdir}${jvmdir}/man"
+      ln -s /usr/share/man "${pkgdir}${jvmdir}/man"
+    fi
+
+    # 安装许可
+    install -dm 755 "${pkgdir}/usr/share/licenses/${pkgname}/${dest_name}"
+    for f in LICENSE ASSEMBLY_EXCEPTION THIRD_PARTY_README; do
+      if [[ -f "${src_path}/$f" ]]; then
+        cp "${src_path}/$f" "${pkgdir}/usr/share/licenses/${pkgname}/${dest_name}/"
+      elif [[ -f "${src_path}/legal/java.base/$f" ]]; then
+        cp "${src_path}/legal/java.base/$f" "${pkgdir}/usr/share/licenses/${pkgname}/${dest_name}/"
+      fi
+    done
+  }
+
+  for ver in "8:zulu8" "11:zulu11" "17:zulu17" "21:zulu21" "25:zulu25"; do
+    _install_jdk ${ver%%:*} ${ver#*:}
+  done
+}
