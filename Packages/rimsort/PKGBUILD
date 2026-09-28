@@ -1,8 +1,8 @@
 # shellcheck disable=SC2034 disable=SC2148 disable=SC2164 disable=SC2154
 
 pkgname="rimsort"
-pkgver=1.14.0
-pkgrel=2
+pkgver=1.14.1
+pkgrel=3
 pkgdesc="A Mod Manager For Rimworld game"
 arch=("x86_64")
 url="https://github.com/RimSort/RimSort"
@@ -13,7 +13,6 @@ makedepends=(
     qt6-tools
 )
 depends=(
-    qt6-base
     fcitx5-qt
 )
 optdepends=(
@@ -84,12 +83,16 @@ package() {
     install -dm755 "$pkgdir/opt/rimsort/locales"
     cp -a locales/*.qm "$pkgdir/opt/rimsort/locales/" 2>/dev/null || true
 
-    if [[ -d libs ]]; then
-        cp -a libs "$pkgdir/opt/rimsort/"
-    fi
+    cp -a libs "$pkgdir/opt/rimsort/"
 
     install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
     install -Dm644 themes/default-icons/AppIcon_a.png "$pkgdir/usr/share/pixmaps/RimSort.png"
     install -Dm644 "$srcdir/RimSort.desktop" "$pkgdir/usr/share/applications/RimSort.desktop"
     install -Dm755 "$srcdir/RimSort.sh" "$pkgdir/usr/bin/RimSort"
+
+    # 输入法
+    local target_dir="$pkgdir/opt/rimsort/PySide6/qt-plugins/platforminputcontexts"
+    install -dm755 "$target_dir"
+    ln -sf /usr/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so \
+        "$target_dir/libfcitx5platforminputcontextplugin.so"
 }
