@@ -2,7 +2,7 @@
 
 pkgname="rimsort"
 pkgver=1.15.0
-pkgrel=3
+pkgrel=4
 pkgdesc="A Mod Manager For Rimworld game"
 arch=("x86_64")
 url="https://github.com/RimSort/RimSort"
@@ -11,9 +11,6 @@ makedepends=(
     uv
     git
     qt6-tools
-)
-depends=(
-    fcitx5-qt
 )
 optdepends=(
     "todds: Texture optimization support"
@@ -28,7 +25,7 @@ sha512sums=(
     'SKIP'
     'SKIP'
 )
-options=(!strip)
+options=(!strip !lto)
 
 prepare() {
     cd "$srcdir/RimSort"
@@ -62,6 +59,7 @@ EOF
     PYTHONPATH="$PWD/submodules/SteamworksPy" \
         uv run --frozen nuitka \
         --mode=standalone \
+        --lto=no \
         --enable-plugin=pyside6 \
         --noinclude-qt-translations \
         --noinclude-default-mode=warning \
@@ -89,10 +87,4 @@ package() {
     install -Dm644 themes/default-icons/AppIcon_a.png "$pkgdir/usr/share/pixmaps/RimSort.png"
     install -Dm644 "$srcdir/RimSort.desktop" "$pkgdir/usr/share/applications/RimSort.desktop"
     install -Dm755 "$srcdir/RimSort.sh" "$pkgdir/usr/bin/RimSort"
-
-    # 输入法
-    local target_dir="$pkgdir/opt/rimsort/PySide6/qt-plugins/platforminputcontexts"
-    install -dm755 "$target_dir"
-    ln -sf /usr/lib/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so \
-        "$target_dir/libfcitx5platforminputcontextplugin.so"
 }
