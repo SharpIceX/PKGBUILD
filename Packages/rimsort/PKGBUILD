@@ -1,8 +1,8 @@
 # shellcheck disable=SC2034 disable=SC2148 disable=SC2164 disable=SC2154
 
 pkgname="rimsort"
-pkgver=1.15.0
-pkgrel=4
+pkgver=1.17.3
+pkgrel=1
 pkgdesc="A Mod Manager For Rimworld game"
 arch=("x86_64")
 url="https://github.com/RimSort/RimSort"
