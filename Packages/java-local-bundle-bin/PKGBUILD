@@ -3,71 +3,105 @@
 pkgname="java-local-bundle-bin"
 pkgrel=1
 arch=('x86_64')
-pkgver=2026.07.03
-license=('custom')
+pkgver=2026.11.17
 options=('!strip')
+license=('custom:Azul')
 url='https://www.azul.com/downloads'
 pkgdesc="Custom bundle of Zulu JDKs: 8, 11, 17, 21, and 25"
-depends=('java-environment-common' 'java-runtime-common' 'ca-certificates-utils')
 
 provides=(
+  "java-runtime"
+  "java-environment"
+  "java-runtime-headless"
+
   # Java 8
-  "java-runtime-2"
-  "java-runtime-headless-2"
-  "java-runtime-openjdk-2"
-  "java-environment-2"
-  "java-environment-openjdk-2"
   "java-runtime=8"
-  "java-runtime-headless=8"
-  "java-runtime-openjdk=8"
   "java-environment=8"
+  "java-runtime-openjdk=8"
+  "java-runtime-headless=8"
   "java-environment-openjdk=8"
 
   # Java 11
   "java-runtime=11"
-  "java-runtime-headless=11"
-  "java-runtime-openjdk=11"
   "java-environment=11"
+  "java-runtime-openjdk=11"
+  "java-runtime-headless=11"
   "java-environment-openjdk=11"
 
   # Java 17
   "java-runtime=17"
-  "java-runtime-headless=17"
-  "java-runtime-openjdk=17"
   "java-environment=17"
+  "java-runtime-openjdk=17"
+  "java-runtime-headless=17"
   "java-environment-openjdk=17"
 
   # Java 21
   "java-runtime=21"
-  "java-runtime-headless=21"
-  "java-runtime-openjdk=21"
   "java-environment=21"
+  "java-runtime-openjdk=21"
+  "java-runtime-headless=21"
   "java-environment-openjdk=21"
 
   # Java 25
   "java-runtime=25"
-  "java-runtime-headless=25"
-  "java-runtime-openjdk=25"
   "java-environment=25"
+  "java-runtime-openjdk=25"
+  "java-runtime-headless=25"
   "java-environment-openjdk=25"
+)
 
-  # 其他
-  "jdk25-openjdk"
+depends=(
+  # Java基础
+  'java-runtime-common'
+  'ca-certificates-utils'
+  'java-environment-common'
+
+  # 运行基础
+  'nss'
+  'zlib'
+  'glibc'
+  'gcc-libs'
+
+  # 字体
+  'lcms2'
+  'harfbuzz'
+  'freetype2'
+  'fontconfig'
+
+  # 图像处理
+  'libpng'
+  'giflib'
+  'libjpeg-turbo'
+
+  # X11 和 GUI
+  'libxi'
+  'libx11'
+  'libxext'
+  'libxtst'
+  'libglvnd'
+  'alsa-lib'
+  'libxrender'
+)
+
+optdepends=(
+  'gtk3: GTK3 look and feel for Swing/GUI applications'
+  'gvfs: Open links and desktop integration'
+  'hicolor-icon-theme: Desktop icon support'
 )
 
 source=(
-  "jdk8.tar.gz::https://cdn.azul.com/zulu/bin/zulu8.96.0.205-ca-fx-jdk8.0.504-linux_x64.tar.gz"
-  "jdk11.tar.gz::https://cdn.azul.com/zulu/bin/zulu11.90.205-ca-fx-jdk11.0.32.1-linux_x64.tar.gz"
-  "jdk17.tar.gz::https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-fx-jdk17.0.20.1-linux_x64.tar.gz"
-  "jdk21.tar.gz::https://cdn.azul.com/zulu/bin/zulu21.52.203-ca-fx-jdk21.0.12.1-linux_x64.tar.gz"
-  "jdk25.tar.gz::https://cdn.azul.com/zulu/bin/zulu25.36.205-ca-fx-jdk25.0.4.1-linux_x64.tar.gz"
+  "${pkgname}-zulu8-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu8.98.0.111-ca-fx-jdk8.0.512-linux_x64.tar.gz"
+  "${pkgname}-zulu11-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu11.92.113-ca-fx-jdk11.0.33-linux_x64.tar.gz"
+  "${pkgname}-zulu17-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu17.70.113-ca-fx-jdk17.0.21.0.3-linux_x64.tar.gz"
+  "${pkgname}-zulu21-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu21.54.109-ca-fx-jdk21.0.13.0.3-linux_x64.tar.gz"
+  "${pkgname}-zulu25-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu25.38.109-ca-fx-jdk25.0.5.0.3-linux_x64.tar.gz"
 )
 sha256sums=(
-    'c5dcd67eac70e56154e06fa1dca88d27b5a66114835303155f3388e130bb430a'
-    'ee90afd42c2e3e2cab7e1f1d64c0ea8ff43064aa2caa9903fb305bedd6d41961'
-    'd9aee66304a647e0bac7f732624ffac2b0c52962389291c08eacf00bc3779443'
-    '6b3f9319490fb265252647676ef74008695b9d3a3725b214c3679cb01dfde87d'
-    'dc541c82220402985ef4f646246235a55920f4493d79670eddaf33fa45a5c73c')
+    'b5e5a8607bab3b70f8bc9a1e527a45e94fb2099d9bad89d1c8e0defc17976bb2'
+    'bb3f0f48a51f69d8a1feb093d725c01067b485e73aa77240be20bb3e99a27906'
+    '5337e0507ed539f1c35f9e0d3c4c7669d594a66e5acb937f84b65a9777a14ebd'
+    '8f5168f564c67cef3c4c371e6eb26f480799565659999da9aa3c142f9604e7ac'
+    '58da871f1d12ff834e408cfa9c10ad3e5ca590bc4623dfb2421c449b1971518a')
 
 package() {
   _install_jdk() {
@@ -78,12 +112,12 @@ package() {
     local etcdir="/etc/zulu-bundle/${dest_name}"
 
     # 定位解压目录
-    local src_path
-    src_path=$(find "$srcdir" -maxdepth 1 -type d -name "${folder_pre}*" -print -quit)
+    local src_paths=("$srcdir/${folder_pre}"*)
+    local src_path="${src_paths[0]}"
 
-    # 安装基本 JDL
+    # 安装基本 JDK
     install -dm 755 "${pkgdir}${jvmdir}"
-    cp -a "${src_path}"/* "${pkgdir}${jvmdir}/"
+    cp -a "${src_path}/." "${pkgdir}${jvmdir}/"
 
     # 处理配置和证书库
     install -dm 755 "${pkgdir}${etcdir}"
@@ -107,7 +141,7 @@ package() {
       ln -sf /etc/ssl/certs/java/cacerts "${pkgdir}${cacerts_path}"
     fi
 
-    # 4. 处理 Man Pages
+    # 处理 Man Pages
     if [[ -d "${pkgdir}${jvmdir}/man/man1" ]]; then
       install -dm 755 "${pkgdir}/usr/share/man/man1"
       for m in "${pkgdir}${jvmdir}/man/man1"/*.1; do

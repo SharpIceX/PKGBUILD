@@ -1,7 +1,7 @@
 # shellcheck disable=SC2034 disable=SC2148 disable=SC2164 disable=SC2154
 
 pkgname="rimsort"
-pkgver=1.17.3
+pkgver=1.17.4
 pkgrel=1
 pkgdesc="A Mod Manager For Rimworld game"
 arch=("x86_64")
@@ -25,6 +25,8 @@ sha512sums=(
     'SKIP'
     'SKIP'
 )
+
+# 开启 LTO 不会导致出现问题，但会导致打包需要 60G+内存以及两个小时左右的时间。
 options=(!strip !lto)
 
 prepare() {
@@ -53,7 +55,7 @@ EOF
         lrelease "$ts_file" -qm "${ts_file%.ts}.qm"
     done
 
-    uv sync --locked --no-dev --group build
+    uv sync --frozen --no-dev --group build
     uv run --frozen python ./distribute.py --product-version="${pkgver}.0" --skip-build
 
     PYTHONPATH="$PWD/submodules/SteamworksPy" \
