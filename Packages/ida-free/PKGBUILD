@@ -2,62 +2,72 @@
 
 # shellcheck disable=SC2148 disable=SC2034 disable=SC2154
 
-pkgver=9.4.0
+pkgver=9.5.0
 pkgname="ida-free"
 pkgrel=1
 pkgdesc="Hex-Rays IDA Free"
 url="https://hex-rays.com/ida-free"
 license=('custom')
+depends=(
+    'glib2'
+    'libgl'
+    'libx11'
+    'libxext'
+    'libxrender'
+    'python-rpyc'
+    'qt6-base'
+    'qt6-wayland'
+)
 makedepends=('fakechroot')
-depends=('libgl'
-	'libx11'
-	'libxext'
-	'libxrender'
-	'glib2'
-	'qt5-base'
-	'python-rpyc'
-	)
 options=('!strip')
 
-_installer='ida-free-pc_94_x64linux.run'
+_installer='ida-free-pc_95_x64linux.run'
 
 source=("file://${_installer}"
-		"${pkgname}.desktop")
+        "${pkgname}.desktop")
 
-sha256sums=('SKIP'
+sha256sums=('c7828e9b3e87e6448fce171d42acb091a4318e67c28b9eb26ac11becb1e39c88'
             'SKIP')
 
 arch=('x86_64')
 
 package() {
-	install -d "${pkgdir}"/opt/${pkgname}
-	install -d "${pkgdir}"/usr/bin
-	install -d "${pkgdir}"/usr/share/{icons,applications,licenses/${pkgname}}
-	install -d "${pkgdir}"/tmp
+    install -d "${pkgdir}"/opt/${pkgname}
+    install -d "${pkgdir}"/usr/bin
+    install -d "${pkgdir}"/usr/share/{icons,applications,licenses/${pkgname}}
+    install -d "${pkgdir}"/tmp
 
-	# chroot is needed to prevent the installer from creating a single file outside of prefix
-	# have to copy the installer due to chroot
-	cp "${srcdir}"/${_installer} "${pkgdir}"/
-	chmod +x "${pkgdir}"/${_installer}
+    cp "${srcdir}"/${_installer} "${pkgdir}"/
+    chmod +x "${pkgdir}"/${_installer}
 
-	# IDA Pro 9.0 SP1 (and newer) installer now tries to copy the .desktop files to $HOME even if you specify a prefix. Very annoying.
-	mkdir -p "$pkgdir"/"$HOME"/.local/share/applications
-	fakechroot chroot "${pkgdir}" /${_installer} --mode unattended --prefix "/opt/${pkgname}"
-	rm "${pkgdir}"/${_installer}
-	rm -Rf "${pkgdir:?}/"{tmp,home}
+    # IDA 9.0+ 的 BitRock 安装程序会忽略 prefix 强制向 $HOME 写入快捷方式
+    mkdir -p "${pkgdir}/${HOME}"/.local/share/applications
+    fakechroot chroot "${pkgdir}" /${_installer} --mode unattended --prefix "/opt/${pkgname}"
 
-	# the installer needlessly makes a lot of files executable
-	find "${pkgdir}"/opt/${pkgname} -type f -exec chmod -x {} \;
-	chmod +x "${pkgdir}"/opt/${pkgname}/{ida,picture_decoder}
+    # 清理无用文件
+    rm -f "${pkgdir}"/${_installer}
+    rm -Rf "${pkgdir:?}"/{tmp,home}
 
-	# 9.3 change docs permissions
-	find "${pkgdir}"/opt/${pkgname}/docs -type d -exec chmod 755 {} \;
-	find "${pkgdir}"/opt/${pkgname}/docs -type f -exec chmod 644 {} \;
+    # 修复 BitRock 安装程序误将所有文件设为可执行的问题
+    find "${pkgdir}"/opt/${pkgname} -type f -exec chmod -x {} \;
+    chmod +x "${pkgdir}"/opt/${pkgname}/{ida,picture_decoder}
+    if [[ -d "${pkgdir}/opt/${pkgname}/tools" ]]; then
+        find "${pkgdir}/opt/${pkgname}/tools" -type f | while read -r f; do
+            if [[ "$(head -c 4 "$f" 2>/dev/null)" == $'\x7fELF' ]]; then
+                chmod +x "$f"
+            fi
+        done
+    fi
 
-	rm "${pkgdir}"/opt/${pkgname}/{uninstall*,Uninstall*}
+    if [[ -d "${pkgdir}/opt/${pkgname}/docs" ]]; then
+        find "${pkgdir}"/opt/${pkgname}/docs -type d -exec chmod 755 {} \;
+        find "${pkgdir}"/opt/${pkgname}/docs -type f -exec chmod 644 {} \;
+    fi
 
-	install "${srcdir}"/${pkgname}*.desktop "${pkgdir}"/usr/share/applications
-	ln -s /opt/${pkgname}/appico.png "${pkgdir}"/usr/share/icons/${pkgname}.png
-	ln -s /opt/${pkgname}/license.txt "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
-	ln -s /opt/${pkgname}/ida "${pkgdir}"/usr/bin/ida
+    rm -f "${pkgdir}"/opt/${pkgname}/{uninstall*,Uninstall*} "${pkgdir}"/opt/${pkgname}/*.dat
+
+    install -m644 "${srcdir}"/${pkgname}*.desktop "${pkgdir}"/usr/share/applications/
+    ln -s /opt/${pkgname}/appico.png "${pkgdir}"/usr/share/icons/${pkgname}.png
+    ln -s /opt/${pkgname}/license.txt "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+    ln -s /opt/${pkgname}/ida "${pkgdir}"/usr/bin/ida
 }
