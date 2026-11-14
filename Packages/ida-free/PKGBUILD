@@ -1,3 +1,5 @@
+# Maintainer: SharpIce <VupRbl@163.com>
+
 # 参考 patchouli aur/ida-pro 的打包
 
 # shellcheck disable=SC2148 disable=SC2034 disable=SC2154

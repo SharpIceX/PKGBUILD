@@ -1,0 +1,40 @@
+# Maintainer: SharpIce <VupRbl@163.com>
+
+# shellcheck disable=SC2148 disable=SC2034 disable=SC2154
+
+pkgname=bug-clicker-bin
+pkgver=1.19.5
+pkgrel=1
+pkgdesc="Customizable desktop pet clicker"
+arch=('x86_64')
+url="https://bugndev.web.app"
+license=('LicenseRef-custom')
+depends=('electron44' 'xorg-xwayland')
+makedepends=('asar')
+source=("bug-clicker-${pkgver}.asar::https://github.com/BUG-INVADE/Bug-Clicker-download/releases/download/v${pkgver}/bug-clicker-${pkgver}.asar"
+        "bug-clicker.sh"
+        "bug-clicker.desktop"
+        "icon.png")
+noextract=("bug-clicker-${pkgver}.asar")
+sha512sums=('dfb53dbb46ccfb0e5436e3329064944675bc3af56fc91acbd155101d2c42c234af65f96572a38090bbf2a40b29806e2ce368a7e4ee948717b3dfe8555f2612d1'
+            'SKIP'
+            'SKIP'
+            'e159258d2da5cc4579fd9254aca1da27ac11458336aa201f1e8a5a55f34ba97b792521b97e208a74360fb0bffafdeeb482268a60de8b569ceb540b052a378daf')
+
+prepare() {
+    asar extract "$srcdir/bug-clicker-${pkgver}.asar" "$srcdir/app"
+}
+
+package() {
+    # 删除不要的文件
+    rm -f "$srcdir/app/src/update-config.json"
+
+    install -dm755 "$pkgdir/usr/share/bug-clicker"
+    cp -a "$srcdir/app/." "$pkgdir/usr/share/bug-clicker/"
+    find "$pkgdir/usr/share/bug-clicker" -type d -exec chmod 755 {} +
+    find "$pkgdir/usr/share/bug-clicker" -type f -exec chmod 644 {} +
+
+    install -Dm755 "$srcdir/bug-clicker.sh" "$pkgdir/usr/bin/bug-clicker"
+    install -Dm644 "$srcdir/bug-clicker.desktop" "$pkgdir/usr/share/applications/bug-clicker.desktop"
+    install -Dm644 "$srcdir/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/bugclicker.png"
+}

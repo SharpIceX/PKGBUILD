@@ -1,3 +1,5 @@
+# Maintainer: SharpIce <VupRbl@163.com>
+
 # shellcheck disable=SC2034 disable=SC2148
 
 pkgname=empty_packages
