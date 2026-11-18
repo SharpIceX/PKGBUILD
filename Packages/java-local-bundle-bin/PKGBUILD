@@ -5,7 +5,7 @@
 pkgname="java-local-bundle-bin"
 pkgrel=1
 arch=('x86_64')
-pkgver=2026.11.17
+pkgver=2026.11.18
 options=('!strip')
 license=('custom:Azul')
 url='https://www.azul.com/downloads'
@@ -92,18 +92,18 @@ optdepends=(
 )
 
 source=(
-  "${pkgname}-zulu8-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu8.98.0.111-ca-fx-jdk8.0.512-linux_x64.tar.gz"
-  "${pkgname}-zulu11-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu11.92.113-ca-fx-jdk11.0.33-linux_x64.tar.gz"
-  "${pkgname}-zulu17-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu17.70.113-ca-fx-jdk17.0.21.0.3-linux_x64.tar.gz"
-  "${pkgname}-zulu21-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu21.54.109-ca-fx-jdk21.0.13.0.3-linux_x64.tar.gz"
-  "${pkgname}-zulu25-fx.tar.gz::https://cdn.azul.com/zulu/bin/zulu25.38.109-ca-fx-jdk25.0.5.0.3-linux_x64.tar.gz"
+  "${pkgname}-zulu8.tar.gz::https://cdn.azul.com/zulu/bin/zulu8.98.0.201-ca-jdk8.0.514-linux_x64.tar.gz"
+  "${pkgname}-zulu11.tar.gz::https://cdn.azul.com/zulu/bin/zulu11.92.201-ca-jdk11.0.33.1-linux_x64.tar.gz"
+  "${pkgname}-zulu17.tar.gz::https://cdn.azul.com/zulu/bin/zulu17.70.201-ca-jdk17.0.21.1-linux_x64.tar.gz"
+  "${pkgname}-zulu21.tar.gz::https://cdn.azul.com/zulu/bin/zulu21.54.201-ca-jdk21.0.13.1-linux_x64.tar.gz"
+  "${pkgname}-zulu25.tar.gz::https://cdn.azul.com/zulu/bin/zulu25.38.201-ca-jdk25.0.5.1-linux_x64.tar.gz"
 )
 sha256sums=(
-    'b5e5a8607bab3b70f8bc9a1e527a45e94fb2099d9bad89d1c8e0defc17976bb2'
-    'bb3f0f48a51f69d8a1feb093d725c01067b485e73aa77240be20bb3e99a27906'
-    '5337e0507ed539f1c35f9e0d3c4c7669d594a66e5acb937f84b65a9777a14ebd'
-    '8f5168f564c67cef3c4c371e6eb26f480799565659999da9aa3c142f9604e7ac'
-    '58da871f1d12ff834e408cfa9c10ad3e5ca590bc4623dfb2421c449b1971518a')
+    '16a4c55c3061ee41e94edb109f5aea1c55a2952d37e25e215d478b8347350860'
+    '9394707fa2ede9929cee172bc0ac5b7cfe9f6af35e5768bf974515a3faa39c67'
+    '2837aee74267e02106ee6006809bb0de23ccfa43bf5005621517194b79975695'
+    '510696f7da795e08b48432268173b060a49a6a3b05430690e776b5f3ddecac5e'
+    'fc7a3d9396b443134666b9cf7cd946b532dc1781f5350c725849ac50d16a7198')
 
 package() {
   _install_jdk() {
