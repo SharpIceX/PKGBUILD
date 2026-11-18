@@ -34,5 +34,5 @@ package() {
 
     install -Dm755 "$srcdir/bug-clicker.sh" "$pkgdir/usr/bin/bug-clicker"
     install -Dm644 "$srcdir/bug-clicker.desktop" "$pkgdir/usr/share/applications/bug-clicker.desktop"
-    install -Dm644 "$srcdir/app/assets/app-icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/bug-clicker.png"
+    install -Dm644 "$srcdir/app/assets/app-icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/bug_clicker.png"
 }
