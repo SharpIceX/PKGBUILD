@@ -9,24 +9,22 @@ pkgdesc="Customizable desktop pet clicker"
 arch=('x86_64')
 url="https://bugndev.web.app"
 license=('LicenseRef-custom')
-depends=('electron44' 'xorg-xwayland')
+depends=('bash' 'electron44' 'xorg-xwayland')
 makedepends=('asar')
 source=("bug-clicker-${pkgver}.asar::https://github.com/BUG-INVADE/Bug-Clicker-download/releases/download/v${pkgver}/bug-clicker-${pkgver}.asar"
         "bug-clicker.sh"
-        "bug-clicker.desktop"
-        "icon.png")
+        "bug-clicker.desktop")
 noextract=("bug-clicker-${pkgver}.asar")
 sha512sums=('4260186a3312690cbd7415478aeff189835f499c97388b55b1eca15132fa9a68909c6860b872de06d8e98a43d59c79ef6755ba9a675f0ff4c74c340a2f622c8c'
             'SKIP'
-            'SKIP'
-            'e159258d2da5cc4579fd9254aca1da27ac11458336aa201f1e8a5a55f34ba97b792521b97e208a74360fb0bffafdeeb482268a60de8b569ceb540b052a378daf')
+            'SKIP')
 
 prepare() {
     asar extract "$srcdir/bug-clicker-${pkgver}.asar" "$srcdir/app"
 }
 
 package() {
-    # 删除不要的文件
+    # 移除更新
     rm -f "$srcdir/app/src/update-config.json"
 
     install -dm755 "$pkgdir/usr/share/bug-clicker"
@@ -36,5 +34,5 @@ package() {
 
     install -Dm755 "$srcdir/bug-clicker.sh" "$pkgdir/usr/bin/bug-clicker"
     install -Dm644 "$srcdir/bug-clicker.desktop" "$pkgdir/usr/share/applications/bug-clicker.desktop"
-    install -Dm644 "$srcdir/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/bugclicker.png"
+    install -Dm644 "$srcdir/app/assets/app-icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/bug-clicker.png"
 }

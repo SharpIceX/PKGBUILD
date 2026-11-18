@@ -1,9 +1,8 @@
 [Desktop Entry]
 Name=BUG Clicker
 Comment=Customizable desktop pet clicker
-Exec=/usr/bin/bug-clicker %U
+Exec=bug-clicker
 Terminal=false
 Type=Application
 Icon=bugclicker
-StartupWMClass=bug-clicker
 Categories=Game;Amusement;
