@@ -1,0 +1,17 @@
+{
+    "assetDirectories": [
+        "/opt/openstarbound/assets/",
+        "@USER_DATA_DIR@/mods/"
+    ],
+    "storageDirectory": "@USER_DATA_DIR@/storage/",
+    "assetsSettings": {
+        "pathIgnore": [],
+        "digestIgnore": [
+            ".*"
+        ]
+    },
+    "defaultConfiguration": {
+        "allowAdminCommandsFromAnyone": false,
+        "anonymousConnectionsAreAdmin": false
+    }
+}

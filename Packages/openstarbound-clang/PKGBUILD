@@ -1,0 +1,134 @@
+# Maintainer: SharpIce <VupRbl@163.com>
+
+# 整合自：https://github.com/SharpIceX/OpenStarbound_Compiler
+
+# shellcheck disable=SC1091 disable=SC2034 disable=SC2148 disable=SC2154 disable=SC2164
+
+pkgname=openstarbound-clang
+pkgrel=1
+pkgver=0.1.15.1
+pkgdesc="Open-source reimplementation and enhancement of Starbound"
+arch=('x86_64')
+provides=('openstarbound')
+conflicts=('openstarbound')
+license=('LicenseRef-proprietary')
+url="https://github.com/OpenStarbound/OpenStarbound"
+depends=(
+    "bash"
+    "glibc"
+    'libx11'
+    "gcc-libs"
+    "libglvnd"
+)
+makedepends=(
+    "git"
+    "lld"
+    "llvm"
+    "gcc15"
+    "ninja"
+    "vcpkg"
+    "cmake"
+    "clang"
+    "pkgconf"
+)
+optdepends=(
+    'steam: Steam integration'
+    'discord: Discord integration'
+
+    "wayland: Wayland display backend"
+    "libxkbcommon: Wayland keyboard support"
+)
+source=(
+    "git+https://github.com/OpenStarbound/OpenStarbound.git#tag=v${pkgver}"
+    "io.github.openstarbound.openstarbound.desktop"
+    "openstarbound-client.sh"
+    "openstarbound-server.sh"
+    "sbinit.config.template"
+)
+sha256sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+
+prepare() {
+    # # 处理 vcpkg
+    if [ -z "${VCPKG_ROOT:-}" ] && [ -f "/etc/profile.d/vcpkg.sh" ]; then
+        source "/etc/profile.d/vcpkg.sh"
+    fi
+
+    if [ -z "${VCPKG_ROOT:-}" ]; then
+        error 'VCPKG_ROOT is not set.'
+        return 1
+    fi
+
+    export VCPKG_ROOT
+    export VCPKG_DISABLE_METRICS=1
+    export VCPKG_FORCE_SYSTEM_BINARIES=1
+
+    if [ ! -f "$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" ]; then
+        mkdir -p "$(dirname "$VCPKG_ROOT")"
+        git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+    fi
+
+    # # 处理游戏资源
+    # TODO：这里其实应搞要有个复杂的解析拿到游戏目录，但因为是我自己使用就先忽略了
+    cp -r "$HOME/.local/share/Steam/steamapps/common/Starbound/assets/" "$srcdir/game_assets"
+}
+
+build() {
+    if [ -z "${VCPKG_ROOT:-}" ]; then
+        source "/etc/profile.d/vcpkg.sh"
+    fi
+
+    GCC15_INSTALL_DIR="$(dirname "$(gcc-15 -print-file-name=libstdc++.so)")"
+
+    export VCPKG_ROOT
+    export VCPKG_DISABLE_METRICS=1
+    export VCPKG_FORCE_SYSTEM_BINARIES=1
+
+    export CC=clang
+    export CXX=clang++
+    export CFLAGS="${CFLAGS:+$CFLAGS }--gcc-install-dir=${GCC15_INSTALL_DIR}"
+    export CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }--gcc-install-dir=${GCC15_INSTALL_DIR}"
+
+    cmake --preset "linux-release-clang" \
+        -S "$srcdir/OpenStarbound/source" \
+        -B "$srcdir/build" \
+        -DSTAR_USE_MIMALLOC=ON \
+        -DSTAR_USE_JEMALLOC=OFF \
+        -DSTAR_SOURCE_IDENTIFIER="v${pkgver}" \
+        -DSTAR_ENABLE_STEAM_INTEGRATION=ON \
+        -DSTAR_ENABLE_DISCORD_INTEGRATION=ON \
+        -DBUILD_TESTING=OFF
+
+    cmake --build "$srcdir/build" --config Release
+
+    "$srcdir/OpenStarbound/dist/asset_packer" \
+        -c "$srcdir/OpenStarbound/scripts/packing.config" \
+        "$srcdir/OpenStarbound/assets/opensb" \
+        "$srcdir/game_assets/opensb.pak"
+}
+
+package() {
+    install -dm755 "$pkgdir/opt/openstarbound/linux"
+    install -dm755 "$pkgdir/opt/openstarbound/assets"
+
+    cp -a "$srcdir/OpenStarbound/dist/." "$pkgdir/opt/openstarbound/linux/"
+
+    install -Dm755 "$srcdir/OpenStarbound/lib/linux/"*.so "$pkgdir/opt/openstarbound/linux/"
+    install -Dm644 "$srcdir/OpenStarbound/scripts/steam_appid.txt" "$pkgdir/opt/openstarbound/linux/"
+
+    cp -a "$srcdir/game_assets/." "$pkgdir/opt/openstarbound/assets/"
+
+    install -Dm644 "$srcdir/sbinit.config.template" "$pkgdir/opt/openstarbound/sbinit.config.template"
+
+    install -Dm644 "$srcdir/OpenStarbound/doc/OPENSOURCE.md" "$pkgdir/usr/share/licenses/$pkgname/OPENSOURCE.md"
+
+    install -Dm755 "$srcdir/openstarbound-client.sh" "$pkgdir/usr/bin/openstarbound-client"
+    install -Dm755 "$srcdir/openstarbound-server.sh" "$pkgdir/usr/bin/openstarbound-server"
+    install -Dm644 "$srcdir/io.github.openstarbound.openstarbound.desktop" "$pkgdir/usr/share/applications/io.github.openstarbound.openstarbound.desktop"
+    install -Dm644 "$srcdir/OpenStarbound/source/client/openstarbound.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/io.github.openstarbound.openstarbound.png"
+}

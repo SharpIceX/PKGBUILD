@@ -1,0 +1,11 @@
+[Desktop Entry]
+Terminal=false
+Type=Application
+Name=OpenStarbound
+PrefersNonDefaultGPU=true
+GenericName=Sandbox Adventure Game
+Exec=/usr/bin/openstarbound-client
+Icon=io.github.openstarbound.openstarbound
+Categories=Game;RolePlaying;AdventureGame;
+StartupWMClass=io.github.openstarbound.openstarbound
+Comment=Open-source reimplementation and enhancement of Starbound
