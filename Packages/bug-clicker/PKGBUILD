@@ -3,7 +3,7 @@
 # shellcheck disable=SC2148 disable=SC2034 disable=SC2154
 
 pkgname=bug-clicker-bin
-pkgver=1.19.6
+pkgver=1.19.7
 pkgrel=1
 pkgdesc="Customizable desktop pet clicker"
 arch=('x86_64')
@@ -15,7 +15,7 @@ source=("bug-clicker-${pkgver}.asar::https://github.com/BUG-INVADE/Bug-Clicker-d
         "bug-clicker.sh"
         "bug-clicker.desktop")
 noextract=("bug-clicker-${pkgver}.asar")
-sha512sums=('4260186a3312690cbd7415478aeff189835f499c97388b55b1eca15132fa9a68909c6860b872de06d8e98a43d59c79ef6755ba9a675f0ff4c74c340a2f622c8c'
+sha256sums=('b25bb8d37de17527c1ff42d087433ca7d6a05b0e4e406a29dd4552045c00978f'
             'SKIP'
             'SKIP')
 
